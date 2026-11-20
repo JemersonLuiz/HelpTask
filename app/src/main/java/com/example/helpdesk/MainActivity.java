@@ -1,10 +1,10 @@
 package com.example.helpdesk;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -13,6 +13,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.ComponentActivity;
+import androidx.activity.OnBackPressedCallback;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,8 +29,12 @@ import com.example.helpdesk.utils.SessaoUsuario;
 import com.example.helpdesk.utils.Validador;
 
 import java.util.List;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ComponentActivity {
     private static final String CODIGO_AUTORIZACAO_TECNICO = "HELPDESK2026";
 
     private static final String STATUS_ABERTO = "Aberto";
@@ -96,10 +102,18 @@ public class MainActivity extends Activity {
 
     private TextView txtListaTitulo;
     private TextView txtListaVazia;
-    private Spinner spinnerFiltroStatus;
-    private Spinner spinnerFiltroCategoria;
-    private Spinner spinnerFiltroPrioridade;
-    private EditText editPesquisaChamado;
+    private TextView txtContagem;
+    private Button btnAbrirFiltros;
+    private final Bundle filtros = new Bundle();
+    private final ExecutorService consultaLista = Executors.newSingleThreadExecutor();
+    private int versaoConsulta;
+    private View telaAtual;
+    private final OnBackPressedCallback voltar = new OnBackPressedCallback(false) {
+        @Override public void handleOnBackPressed() {
+            voltarNaNavegacao();
+        }
+    };
+    private boolean cadastroVeioDoLogin;
     private RecyclerView recyclerChamados;
     private Button btnVoltarLista;
 
@@ -126,9 +140,13 @@ public class MainActivity extends Activity {
         configurarSpinners();
         configurarRecyclerView();
         configurarCliques();
+        getOnBackPressedDispatcher().addCallback(this, voltar);
 
         usuarioLogado = sessaoUsuario.getUsuario();
-        if (usuarioLogado != null) {
+        if (savedInstanceState != null && savedInstanceState.getInt("conta") ==
+                (usuarioLogado == null ? 0 : usuarioLogado.getIdUsuario())) {
+            restaurarTela(savedInstanceState);
+        } else if (usuarioLogado != null) {
             abrirTelaInicialPorPerfil();
         } else {
             mostrarBoasVindas();
@@ -170,10 +188,8 @@ public class MainActivity extends Activity {
 
         txtListaTitulo = findViewById(R.id.txtListaTitulo);
         txtListaVazia = findViewById(R.id.txtListaVazia);
-        spinnerFiltroStatus = findViewById(R.id.spinnerFiltroStatus);
-        spinnerFiltroCategoria = findViewById(R.id.spinnerFiltroCategoria);
-        spinnerFiltroPrioridade = findViewById(R.id.spinnerFiltroPrioridade);
-        editPesquisaChamado = findViewById(R.id.editPesquisaChamado);
+        txtContagem = findViewById(R.id.txtContagem);
+        btnAbrirFiltros = findViewById(R.id.btnAbrirFiltros);
         recyclerChamados = findViewById(R.id.recyclerChamados);
         btnVoltarLista = findViewById(R.id.btnVoltarLista);
 
@@ -188,9 +204,17 @@ public class MainActivity extends Activity {
         configurarSpinner(spinnerCadastroTipo, TIPOS_USUARIO);
         configurarSpinner(spinnerChamadoCategoria, CATEGORIAS_CHAMADO);
         configurarSpinner(spinnerChamadoPrioridade, PRIORIDADES_CHAMADO);
-        configurarSpinner(spinnerFiltroStatus, STATUS_FILTRO);
-        configurarSpinner(spinnerFiltroCategoria, CATEGORIAS_FILTRO);
-        configurarSpinner(spinnerFiltroPrioridade, PRIORIDADES_FILTRO);
+        spinnerCadastroTipo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                boolean precisaCodigo = !"usuario".equals(valorSelecionado(spinnerCadastroTipo));
+                editCodigoAutorizacao.setVisibility(precisaCodigo ? View.VISIBLE : View.GONE);
+                if (!precisaCodigo) {
+                    editCodigoAutorizacao.setText("");
+                    editCodigoAutorizacao.setError(null);
+                }
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
         configurarSpinner(spinnerStatusAtendimento, STATUS_ATENDIMENTO);
     }
 
@@ -204,7 +228,7 @@ public class MainActivity extends Activity {
         chamadoAdapter = new ChamadoAdapter(chamado -> abrirDetalhesChamado(chamado.getIdChamado()));
         recyclerChamados.setLayoutManager(new LinearLayoutManager(this));
         recyclerChamados.setAdapter(chamadoAdapter);
-        recyclerChamados.setNestedScrollingEnabled(false);
+        chamadoAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
     }
 
     // Centraliza os cliques para deixar o fluxo principal facil de acompanhar.
@@ -217,7 +241,7 @@ public class MainActivity extends Activity {
         findViewById(R.id.btnLoginVoltar).setOnClickListener(v -> mostrarBoasVindas());
 
         findViewById(R.id.btnCadastrarUsuario).setOnClickListener(v -> cadastrarUsuario());
-        findViewById(R.id.btnCadastroVoltar).setOnClickListener(v -> mostrarLogin());
+        findViewById(R.id.btnCadastroVoltar).setOnClickListener(v -> voltarNaNavegacao());
 
         findViewById(R.id.btnAbrirChamado).setOnClickListener(v -> mostrarFormularioChamado());
         findViewById(R.id.btnMeusChamados).setOnClickListener(v -> mostrarListaChamados(false));
@@ -226,7 +250,7 @@ public class MainActivity extends Activity {
         findViewById(R.id.btnSalvarChamado).setOnClickListener(v -> salvarChamado());
         findViewById(R.id.btnCancelarFormChamado).setOnClickListener(v -> mostrarHomeUsuario());
 
-        findViewById(R.id.btnAplicarFiltros).setOnClickListener(v -> carregarChamados());
+        btnAbrirFiltros.setOnClickListener(v -> abrirFiltros());
         findViewById(R.id.btnVoltarLista).setOnClickListener(v -> abrirTelaInicialPorPerfil());
         findViewById(R.id.btnLogoutLista).setOnClickListener(v -> sair());
 
@@ -354,16 +378,71 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void carregarChamados() {
-        Integer idUsuarioFiltro = listandoComoTecnico ? null : usuarioLogado.getIdUsuario();
-        String status = valorSelecionado(spinnerFiltroStatus);
-        String categoria = valorSelecionado(spinnerFiltroCategoria);
-        String prioridade = valorSelecionado(spinnerFiltroPrioridade);
-        String pesquisa = textoCampo(editPesquisaChamado);
+    private void abrirFiltros() {
+        View painel = getLayoutInflater().inflate(R.layout.filtros_chamados, null);
+        EditText pesquisa = painel.findViewById(R.id.editPesquisaChamado);
+        pesquisa.setText(filtros.getString("pesquisa", ""));
+        Spinner status = filtroDoPainel(painel, R.id.spinnerFiltroStatus, STATUS_FILTRO, "status");
+        Spinner categoria = filtroDoPainel(painel, R.id.spinnerFiltroCategoria, CATEGORIAS_FILTRO, "categoria");
+        Spinner prioridade = filtroDoPainel(painel, R.id.spinnerFiltroPrioridade, PRIORIDADES_FILTRO, "prioridade");
+        AlertDialog.Builder dialogo = new AlertDialog.Builder(this)
+                .setTitle(R.string.filtrar).setView(painel)
+                .setNegativeButton(R.string.cancelar, null)
+                .setPositiveButton(R.string.aplicar, (dialog, which) -> {
+                    filtros.clear();
+                    if (!textoCampo(pesquisa).isEmpty()) filtros.putString("pesquisa", textoCampo(pesquisa));
+                    guardarFiltro("status", status);
+                    guardarFiltro("categoria", categoria);
+                    guardarFiltro("prioridade", prioridade);
+                    recyclerChamados.scrollToPosition(0);
+                    carregarChamados();
+                });
+        if (!filtros.isEmpty()) {
+            dialogo.setNeutralButton(R.string.limpar, (dialog, which) -> {
+                filtros.clear();
+                recyclerChamados.scrollToPosition(0);
+                carregarChamados();
+            });
+        }
+        dialogo.show();
+    }
 
-        List<Chamado> chamados = chamadoDAO.listarChamados(idUsuarioFiltro, status, categoria, prioridade, pesquisa);
-        chamadoAdapter.atualizar(chamados);
-        txtListaVazia.setVisibility(chamados.isEmpty() ? View.VISIBLE : View.GONE);
+    private Spinner filtroDoPainel(View painel, int id, String[] opcoes, String chave) {
+        Spinner spinner = painel.findViewById(id);
+        configurarSpinner(spinner, opcoes);
+        selecionarValor(spinner, filtros.getString(chave));
+        return spinner;
+    }
+
+    private void guardarFiltro(String chave, Spinner spinner) {
+        if (spinner.getSelectedItemPosition() > 0) filtros.putString(chave, valorSelecionado(spinner));
+    }
+
+    private void carregarChamados() {
+        int consulta = ++versaoConsulta;
+        Integer idUsuario = listandoComoTecnico ? null : usuarioLogado.getIdUsuario();
+        Bundle criterios = new Bundle(filtros);
+        btnAbrirFiltros.setText(filtros.isEmpty() ? getString(R.string.filtrar)
+                : getString(R.string.editar_filtros, filtros.size()));
+        txtContagem.setText(R.string.carregando);
+        txtListaVazia.setVisibility(View.GONE);
+        recyclerChamados.setVisibility(View.INVISIBLE);
+        consultaLista.execute(() -> {
+            List<Chamado> chamados = chamadoDAO.listarChamados(idUsuario, criterios.getString("status"),
+                    criterios.getString("categoria"), criterios.getString("prioridade"), criterios.getString("pesquisa"));
+            runOnUiThread(() -> {
+                if (consulta != versaoConsulta || telaAtual != sectionListaChamados) return;
+                chamadoAdapter.atualizar(chamados);
+                int total = chamados.size();
+                txtContagem.setText(getResources().getQuantityString(R.plurals.total_chamados, total, total));
+                recyclerChamados.setVisibility(total == 0 ? View.GONE : View.VISIBLE);
+                if (total == 0) {
+                    int mensagemVazia = listandoComoTecnico ? R.string.vazia_equipe : R.string.vazia_pessoal;
+                    txtListaVazia.setText(filtros.isEmpty() ? mensagemVazia : R.string.vazia_filtros);
+                    txtListaVazia.setVisibility(View.VISIBLE);
+                }
+            });
+        });
     }
 
     private void abrirDetalhesChamado(int idChamado) {
@@ -478,23 +557,23 @@ public class MainActivity extends Activity {
     }
 
     private void mostrarCadastro() {
+        cadastroVeioDoLogin = telaAtual == sectionLogin;
         mostrarTela(sectionCadastro);
     }
 
     private void mostrarHomeUsuario() {
-        int abertos = chamadoDAO.contarPorStatus(usuarioLogado.getIdUsuario(), STATUS_ABERTO);
-        int emAndamento = chamadoDAO.contarPorStatus(usuarioLogado.getIdUsuario(), STATUS_ANDAMENTO);
-        int resolvidos = chamadoDAO.contarPorStatus(usuarioLogado.getIdUsuario(), STATUS_RESOLVIDO);
-
+        Map<String, Integer> totais = chamadoDAO.contarPorStatusDoUsuario(usuarioLogado.getIdUsuario());
         txtHomeUsuarioSaudacao.setText("Olá, " + usuarioLogado.getNome());
-        txtResumoChamados.setText(
-                "Resumo dos seus chamados\n\n" +
-                        "Abertos: " + abertos + "\n" +
-                        "Em andamento: " + emAndamento + "\n" +
-                        "Resolvidos: " + resolvidos
-        );
+        txtResumoChamados.setText(getString(R.string.resumo_chamados,
+                totalDoStatus(totais, STATUS_ABERTO), totalDoStatus(totais, STATUS_ANDAMENTO),
+                totalDoStatus(totais, STATUS_RESOLVIDO)));
 
         mostrarTela(sectionHomeUsuario);
+    }
+
+    private int totalDoStatus(Map<String, Integer> totais, String status) {
+        Integer quantidade = totais.get(status);
+        return quantidade == null ? 0 : quantidade;
     }
 
     private void mostrarFormularioChamado() {
@@ -508,11 +587,14 @@ public class MainActivity extends Activity {
         txtListaTitulo.setText(tecnico ? "Chamados para atendimento" : "Meus chamados");
         btnVoltarLista.setVisibility(tecnico ? View.GONE : View.VISIBLE);
 
-        carregarChamados();
         mostrarTela(sectionListaChamados);
+        carregarChamados();
     }
 
     private void mostrarTela(View telaAtiva) {
+        telaAtual = telaAtiva;
+        findViewById(R.id.txtAppSubtitulo).setVisibility(telaAtiva == sectionWelcome ? View.VISIBLE : View.GONE);
+        rootScroll.setVisibility(telaAtiva == sectionListaChamados ? View.GONE : View.VISIBLE);
         sectionWelcome.setVisibility(View.GONE);
         sectionLogin.setVisibility(View.GONE);
         sectionCadastro.setVisibility(View.GONE);
@@ -522,7 +604,57 @@ public class MainActivity extends Activity {
         sectionDetalhes.setVisibility(View.GONE);
 
         telaAtiva.setVisibility(View.VISIBLE);
-        rootScroll.post(() -> rootScroll.smoothScrollTo(0, 0));
+        rootScroll.scrollTo(0, 0);
+        voltar.setEnabled(temTelaAnterior());
+    }
+
+    private boolean temTelaAnterior() {
+        return telaAtual == sectionLogin || telaAtual == sectionCadastro || telaAtual == sectionDetalhes
+                || telaAtual == sectionChamadoForm || (telaAtual == sectionListaChamados && !listandoComoTecnico);
+    }
+
+    private void voltarNaNavegacao() {
+        if (telaAtual == sectionDetalhes) mostrarListaChamados(usuarioLogado.ehTecnicoOuAdmin());
+        else if (telaAtual == sectionCadastro && cadastroVeioDoLogin) mostrarLogin();
+        else if (telaAtual == sectionLogin || telaAtual == sectionCadastro) mostrarBoasVindas();
+        else mostrarHomeUsuario();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle estado) {
+        super.onSaveInstanceState(estado);
+        estado.putInt("conta", usuarioLogado == null ? 0 : usuarioLogado.getIdUsuario());
+        estado.putInt("tela", telaAtual.getId());
+        estado.putBoolean("cadastroDoLogin", cadastroVeioDoLogin);
+        estado.putBundle("filtros", new Bundle(filtros));
+        if (chamadoSelecionado != null) estado.putInt("chamado", chamadoSelecionado.getIdChamado());
+    }
+
+    private void restaurarTela(Bundle estado) {
+        int tela = estado.getInt("tela");
+        if (usuarioLogado == null) {
+            if (tela == R.id.sectionCadastro) {
+                cadastroVeioDoLogin = estado.getBoolean("cadastroDoLogin");
+                mostrarTela(sectionCadastro);
+            } else if (tela == R.id.sectionLogin) mostrarLogin();
+            else mostrarBoasVindas();
+            return;
+        }
+        listandoComoTecnico = usuarioLogado.ehTecnicoOuAdmin();
+        if (estado.getBundle("filtros") != null) filtros.putAll(estado.getBundle("filtros"));
+        if (tela == R.id.sectionDetalhes) {
+            mostrarListaChamados(listandoComoTecnico);
+            abrirDetalhesChamado(estado.getInt("chamado"));
+        } else if (tela == R.id.sectionListaChamados) mostrarListaChamados(listandoComoTecnico);
+        else if (tela == R.id.sectionChamadoForm && !listandoComoTecnico) mostrarTela(sectionChamadoForm);
+        else abrirTelaInicialPorPerfil();
+    }
+
+    @Override
+    protected void onDestroy() {
+        versaoConsulta++;
+        consultaLista.shutdownNow();
+        super.onDestroy();
     }
 
     private String montarTextoDetalhes(Chamado chamado) {
@@ -603,6 +735,9 @@ public class MainActivity extends Activity {
     }
 
     private void sair() {
+        versaoConsulta++;
+        filtros.clear();
+        chamadoAdapter.atualizar(Collections.emptyList());
         sessaoUsuario.limpar();
         usuarioLogado = null;
         chamadoSelecionado = null;

@@ -1,6 +1,7 @@
 package com.example.helpdesk.adapters;
 
 import android.view.LayoutInflater;
+import android.content.res.ColorStateList;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -43,13 +44,31 @@ public class ChamadoAdapter extends RecyclerView.Adapter<ChamadoAdapter.ChamadoV
     public void onBindViewHolder(ChamadoViewHolder holder, int position) {
         Chamado chamado = chamados.get(position);
 
-        holder.txtTitulo.setText("#" + chamado.getIdChamado() + " - " + chamado.getTitulo());
-        holder.txtMeta.setText("Solicitante: " + texto(chamado.getNomeSolicitante()) +
-                " | Categoria: " + chamado.getCategoria() +
-                " | Prioridade: " + chamado.getPrioridade());
-        holder.txtStatus.setText("Status: " + chamado.getStatus());
-        holder.txtLocalData.setText("Local: " + chamado.getLocal() +
-                " | Aberto em: " + chamado.getDataAbertura());
+        holder.txtTitulo.setText(holder.itemView.getContext().getString(R.string.item_titulo,
+                chamado.getIdChamado(), chamado.getTitulo()));
+        holder.txtMeta.setText(holder.itemView.getContext().getString(R.string.item_categoria,
+                chamado.getCategoria(), chamado.getPrioridade()));
+        holder.txtStatus.setText(chamado.getStatus());
+        int fundo = R.color.primary_light;
+        int texto = R.color.primary_dark;
+        switch (chamado.getStatus()) {
+            case "Em andamento":
+                fundo = R.color.andamento_fundo;
+                texto = R.color.andamento_texto;
+                break;
+            case "Resolvido":
+                fundo = R.color.resolvido_fundo;
+                texto = R.color.resolvido_texto;
+                break;
+            case "Cancelado":
+                fundo = R.color.background;
+                texto = R.color.text_secondary;
+                break;
+        }
+        holder.txtStatus.setBackgroundTintList(ColorStateList.valueOf(holder.itemView.getContext().getColor(fundo)));
+        holder.txtStatus.setTextColor(holder.itemView.getContext().getColor(texto));
+        holder.txtLocalData.setText(holder.itemView.getContext().getString(R.string.item_origem,
+                chamado.getLocal(), texto(chamado.getNomeSolicitante()), chamado.getDataAbertura()));
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {

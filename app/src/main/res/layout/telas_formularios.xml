@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootScroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <LinearLayout
+            android:id="@+id/headerApp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_header"
+            android:elevation="6dp"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:id="@+id/txtAppTitulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="HelpDesk Mobile"
+                android:textColor="@android:color/white"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtAppSubtitulo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="3dp"
+                android:text="Chamados de manutenção, suporte técnico e problemas estruturais"
+                android:textColor="#DDEEFF"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sectionWelcome"
+            style="@style/CardContainer"
+            android:visibility="visible">
+
+            <TextView
+                style="@style/TitleText"
+                android:text="@string/acesso" />
+
+            <TextView
+                style="@style/BodyText"
+                android:layout_marginTop="10dp"
+                android:text="Use uma conta comum para abrir chamados ou uma conta técnica para gerenciar atendimentos." />
+
+            <Button
+                android:id="@+id/btnWelcomeEntrar"
+                style="@style/ButtonPrimary"
+                android:layout_marginTop="22dp"
+                android:text="Entrar" />
+
+            <Button
+                android:id="@+id/btnWelcomeCriarConta"
+                style="@style/ButtonSecondary"
+                android:text="Criar conta" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sectionLogin"
+            style="@style/CardContainer"
+            android:visibility="gone">
+
+            <TextView style="@style/TitleText" android:text="Login" />
+
+            <EditText
+                android:id="@+id/editLoginEmail"
+                style="@style/InputField"
+                android:layout_marginTop="16dp"
+                android:hint="E-mail"
+                android:inputType="textEmailAddress" />
+
+            <EditText
+                android:id="@+id/editLoginSenha"
+                style="@style/InputField"
+                android:hint="Senha"
+                android:inputType="textPassword" />
+
+            <Button android:id="@+id/btnLoginEntrar" style="@style/ButtonPrimary" android:layout_marginTop="18dp" android:text="Entrar" />
+            <Button android:id="@+id/btnLoginCriarConta" style="@style/ButtonSecondary" android:text="Criar conta" />
+            <Button android:id="@+id/btnLoginVoltar" style="@style/ButtonGhost" android:text="Voltar" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sectionCadastro"
+            style="@style/CardContainer"
+            android:visibility="gone">
+
+            <TextView style="@style/TitleText" android:text="Cadastro de usuário" />
+
+            <EditText android:id="@+id/editCadastroNome" style="@style/InputField" android:layout_marginTop="16dp" android:hint="Nome completo" android:inputType="textPersonName" />
+            <EditText android:id="@+id/editCadastroEmail" style="@style/InputField" android:hint="E-mail" android:inputType="textEmailAddress" />
+            <EditText android:id="@+id/editCadastroSenha" style="@style/InputField" android:hint="Senha com mínimo de 6 caracteres" android:inputType="textPassword" />
+            <EditText android:id="@+id/editCadastroConfirmarSenha" style="@style/InputField" android:hint="Confirmar senha" android:inputType="textPassword" />
+
+            <TextView style="@style/LabelText" android:layout_marginTop="12dp" android:text="Tipo de usuário" />
+            <Spinner android:id="@+id/spinnerCadastroTipo" style="@style/SpinnerField" />
+
+            <EditText android:id="@+id/editCodigoAutorizacao" style="@style/InputField" android:hint="Código de autorização para técnico/admin" android:inputType="text" android:visibility="gone" />
+
+            <Button android:id="@+id/btnCadastrarUsuario" style="@style/ButtonPrimary" android:layout_marginTop="18dp" android:text="Cadastrar" />
+            <Button android:id="@+id/btnCadastroVoltar" style="@style/ButtonGhost" android:text="Voltar" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sectionHomeUsuario"
+            style="@style/CardContainer"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/txtHomeUsuarioSaudacao"
+                style="@style/TitleText" />
+
+            <TextView
+                android:id="@+id/txtResumoChamados"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_info_box"
+                android:lineSpacingExtra="4dp"
+                android:padding="16dp"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp" />
+
+            <Button android:id="@+id/btnAbrirChamado" style="@style/ButtonPrimary" android:layout_marginTop="20dp" android:text="Abrir chamado" />
+            <Button android:id="@+id/btnMeusChamados" style="@style/ButtonSecondary" android:text="Meus chamados" />
+            <Button android:id="@+id/btnLogoutHome" style="@style/ButtonGhost" android:text="Sair" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sectionChamadoForm"
+            style="@style/CardContainer"
+            android:visibility="gone">
+
+            <TextView style="@style/TitleText" android:text="Novo chamado" />
+
+            <EditText android:id="@+id/editChamadoTitulo" style="@style/InputField" android:layout_marginTop="16dp" android:hint="Título do problema" android:inputType="textCapSentences" />
+            <EditText android:id="@+id/editChamadoDescricao" style="@style/InputField" android:gravity="top" android:hint="Descrição detalhada" android:inputType="textMultiLine|textCapSentences" android:minLines="4" />
+            <EditText android:id="@+id/editChamadoLocal" style="@style/InputField" android:hint="Local do problema" android:inputType="textCapWords" />
+
+            <TextView style="@style/LabelText" android:layout_marginTop="12dp" android:text="Categoria" />
+            <Spinner android:id="@+id/spinnerChamadoCategoria" style="@style/SpinnerField" />
+
+            <TextView style="@style/LabelText" android:layout_marginTop="12dp" android:text="Prioridade" />
+            <Spinner android:id="@+id/spinnerChamadoPrioridade" style="@style/SpinnerField" />
+
+            <EditText android:id="@+id/editChamadoAnexo" style="@style/InputField" android:hint="Anexo opcional: caminho ou observação da imagem" android:inputType="text" />
+
+            <Button android:id="@+id/btnSalvarChamado" style="@style/ButtonPrimary" android:layout_marginTop="18dp" android:text="Salvar chamado" />
+            <Button android:id="@+id/btnCancelarFormChamado" style="@style/ButtonGhost" android:text="Cancelar" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sectionDetalhes"
+            style="@style/CardContainer"
+            android:visibility="gone">
+
+            <TextView android:id="@+id/txtDetalhesTitulo" style="@style/TitleText" />
+
+            <TextView
+                android:id="@+id/txtDetalhesConteudo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_info_box"
+                android:lineSpacingExtra="5dp"
+                android:padding="16dp"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:id="@+id/layoutAtendimentoTecnico"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView style="@style/SubTitleText" android:text="Atendimento técnico" />
+                <TextView style="@style/LabelText" android:layout_marginTop="12dp" android:text="Novo status" />
+                <Spinner android:id="@+id/spinnerStatusAtendimento" style="@style/SpinnerField" />
+                <EditText android:id="@+id/editRespostaTecnica" style="@style/InputField" android:gravity="top" android:hint="Resposta ou observação técnica" android:inputType="textMultiLine|textCapSentences" android:minLines="4" />
+                <Button android:id="@+id/btnSalvarAtendimento" style="@style/ButtonPrimary" android:layout_marginTop="18dp" android:text="Salvar atualização" />
+            </LinearLayout>
+
+            <Button android:id="@+id/btnCancelarChamado" style="@style/ButtonDanger" android:layout_marginTop="18dp" android:text="Cancelar chamado" android:visibility="gone" />
+            <Button android:id="@+id/btnVoltarDetalhes" style="@style/ButtonGhost" android:text="Voltar" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -9,7 +9,9 @@ import com.example.helpdesk.database.DatabaseHelper;
 import com.example.helpdesk.models.Chamado;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChamadoDAO {
     private final DatabaseHelper dbHelper;
@@ -124,21 +126,14 @@ public class ChamadoDAO {
         return linhas > 0;
     }
 
-    public int contarPorStatus(Integer idUsuario, String status) {
+    public Map<String, Integer> contarPorStatusDoUsuario(int idUsuario) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM chamados WHERE status = ?");
-        List<String> args = new ArrayList<>();
-        args.add(status);
-
-        if (idUsuario != null) {
-            sql.append(" AND id_usuario = ?");
-            args.add(String.valueOf(idUsuario));
+        String sql = "SELECT status, COUNT(*) FROM chamados WHERE id_usuario = ? GROUP BY status";
+        Map<String, Integer> totais = new HashMap<>();
+        try (Cursor cursor = db.rawQuery(sql, new String[]{String.valueOf(idUsuario)})) {
+            while (cursor.moveToNext()) totais.put(cursor.getString(0), cursor.getInt(1));
         }
-
-        try (Cursor cursor = db.rawQuery(sql.toString(), args.toArray(new String[0]))) {
-            return cursor.moveToFirst() ? cursor.getInt(0) : 0;
-        }
+        return totais;
     }
 
     private boolean filtroAtivo(String valor) {

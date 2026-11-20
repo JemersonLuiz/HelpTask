@@ -12,4 +12,8 @@
     <color name="border">#D6E0EA</color>
     <color name="text_primary">#111827</color>
     <color name="text_secondary">#5F6B7A</color>
+    <color name="andamento_fundo">#FFF1D5</color>
+    <color name="andamento_texto">#694313</color>
+    <color name="resolvido_fundo">#DFF4E9</color>
+    <color name="resolvido_texto">#17583E</color>
 </resources>
