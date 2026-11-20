@@ -18,11 +18,11 @@ Este projeto foi montado para Android Studio a partir da documentacao `HelpDesk_
 
 1. Abra o Android Studio.
 2. Selecione `Open`.
-3. Escolha a pasta `C:\Users\User\OneDrive\Desktop\HelpDesk`.
+3. Escolha a pasta do repositório que contém `settings.gradle`.
 4. Aguarde o Gradle sincronizar.
 5. Execute o app em um emulador ou celular Android.
 
-O projeto usa `com.android.application` versao `9.1.0`, pois essa versao ja existe no cache Gradle local desta maquina. O SDK local apontado em `local.properties` e `C:/Users/User/AppData/Local/Android/Sdk`. O `compileSdk` esta configurado para Android 16 QPR2 (`36.1`) usando a sintaxe atual do Android Gradle Plugin.
+O projeto usa o Android Gradle Plugin 9.1.0 e o SDK Android 36.1. O Android Studio configura o caminho do SDK em `local.properties` para cada máquina. Para compilar pelo terminal no Windows, execute `gradlew.bat :app:assembleDebug` com o JDK do Android Studio.
 
 ## Contas iniciais para teste
 
@@ -77,7 +77,7 @@ HelpDesk/
 |-- settings.gradle
 |-- build.gradle
 |-- gradle.properties
-|-- local.properties
+|-- gradle/wrapper/
 |-- app/
     |-- build.gradle
     |-- src/main/
@@ -96,6 +96,9 @@ HelpDesk/
         |   |-- utils/Validador.java
         |-- res/layout/
         |   |-- activity_main.xml
+        |   |-- telas_formularios.xml
+        |   |-- lista_chamados.xml
+        |   |-- filtros_chamados.xml
         |   |-- item_chamado.xml
         |-- res/values/
             |-- colors.xml

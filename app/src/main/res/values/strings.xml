@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HelpDesk Mobile</string>
+    <string name="acesso">Acesse sua conta</string>
+    <string name="voltar">Voltar</string>
+    <string name="sair">Sair</string>
+    <string name="filtrar">Filtrar chamados</string>
+    <string name="editar_filtros">Editar filtros (%1$d)</string>
+    <string name="pesquisa">Busca</string>
+    <string name="pesquisa_hint">Título ou solicitante</string>
+    <string name="status">Status</string>
+    <string name="categoria">Categoria</string>
+    <string name="prioridade">Prioridade</string>
+    <string name="aplicar">Aplicar</string>
+    <string name="limpar">Limpar filtros</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="vazia_filtros">Nenhum chamado corresponde aos filtros. Toque em Editar filtros para alterar ou limpar a busca.</string>
+    <string name="vazia_equipe">Nenhum chamado para atendimento.</string>
+    <string name="vazia_pessoal">Você ainda não abriu chamados.</string>
+    <string name="carregando">Buscando chamados…</string>
+    <string name="resumo_chamados">Resumo dos seus chamados\n\nAbertos: %1$d\nEm andamento: %2$d\nResolvidos: %3$d</string>
+    <string name="item_titulo">#%1$d · %2$s</string>
+    <string name="item_categoria">%1$s · Prioridade %2$s</string>
+    <string name="item_origem">%1$s · %2$s\nAberto em %3$s</string>
+    <plurals name="total_chamados">
+        <item quantity="one">%d chamado</item>
+        <item quantity="other">%d chamados</item>
+    </plurals>
+</resources>
