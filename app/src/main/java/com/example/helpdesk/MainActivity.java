@@ -281,6 +281,7 @@ public class MainActivity extends ComponentActivity {
         }
 
         usuarioLogado = usuario;
+        editLoginSenha.setText("");
         sessaoUsuario.salvar(usuario);
         abrirTelaInicialPorPerfil();
     }
@@ -741,7 +742,9 @@ public class MainActivity extends ComponentActivity {
         sessaoUsuario.limpar();
         usuarioLogado = null;
         chamadoSelecionado = null;
+        editLoginEmail.setText("");
         editLoginSenha.setText("");
+        limparErrosLogin();
         mostrarBoasVindas();
     }
 
