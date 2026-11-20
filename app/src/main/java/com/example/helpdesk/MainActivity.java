@@ -464,7 +464,7 @@ public class MainActivity extends ComponentActivity {
 
         if (tecnicoOuAdmin) {
             selecionarValor(spinnerStatusAtendimento, chamado.getStatus());
-            editRespostaTecnica.setText(textoOuVazio(chamado.getRespostaTecnico()));
+            editRespostaTecnica.setText(chamado.getRespostaTecnico());
         }
 
         mostrarTela(sectionDetalhes);
